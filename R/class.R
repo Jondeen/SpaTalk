@@ -1,3 +1,12 @@
+
+#' @title Create a 'DistMatrix' object
+#' @description Create a 'DistMatrix' object.
+#' @slot pos A matrix containing the x and y coordinates of the cells.
+#' @return A 'DistMatrix' object.
+#' @export
+
+setClass("DistMatrix", slots = c(pos = "matrix"))
+
 #' @title Definition of 'SpaTalk' class
 #'
 #' @description An S4 class containing the data, meta, and results of inferred cell type compositions, LR pairs, and pathways.
@@ -16,8 +25,25 @@
 #' @aliases SpaTalk-class
 #' @exportClass SpaTalk
 
-setClass("SpaTalk", representation(data = "list", meta = "list", para = "list", coef = "matrix",
-    cellpair = "list", dist = "matrix", lrpair = "data.frame", tf = "data.frame",
-    lr_path = "list"), prototype(data = list(), meta = list(), para = list(), coef = matrix(),
-    cellpair = list(), dist = matrix(), lrpair = data.frame(), tf = data.frame(),
-    lr_path = list()))
+setClass("SpaTalk", representation(
+    data = "list",
+    meta = "list",
+    para = "list",
+    coef = "matrix",
+    cellpair = "list",
+    dist = "DistMatrix",
+    lrpair = "data.frame",
+    tf = "data.frame",
+    lr_path = "list"
+), prototype(
+    data = list(),
+    meta = list(),
+    para = list(),
+    coef = matrix(),
+    cellpair = list(),
+    dist = new("DistMatrix", pos = matrix()),
+    lrpair = data.frame(),
+    tf = data.frame(),
+    lr_path = list()
+))
+

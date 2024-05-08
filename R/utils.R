@@ -307,11 +307,86 @@
     return(as.data.frame(st_coef))
 }
 
+setMethod("[", "DistMatrix", function(x, i, j, ...) {
+    pos_obj <- slot(x, "pos")
+    retrieval_type_i <- {
+    if (!missing(i)) {
+        if (is.character(i)) "single"
+        else if (is.vector(i)) "indexed"
+        else stop("Unable to determine retrieval type for i")
+    } else {
+       if (!missing(j)) "columnwise"
+       else stop("i or j must be a character or a vector")
+    }
+    }
+
+    retrieval_type_j <- {
+    if (!missing(j)) {
+        if (is.character(j)) "single"
+        else if (is.vector(j)) "indexed"
+        else stop("Unable to determine retrieval type for j")
+    } else {
+       if (!missing(i)) "rowwise"
+       else stop("i or j must be a character or a vector")
+    }
+    }
+
+    if (retrieval_type_i == "single" && retrieval_type_j == "rowwise") {
+        # Calculate distances to all objects in j
+        x <- pos_obj[i,1]
+        y <- pos_obj[i,2]
+        dists <- sqrt((x - pos_obj[,1])^2 + (y - pos_obj[,2])^2)
+    } else if (retrieval_type_i == "single" && retrieval_type_j == "indexed") {
+        # Calculate distances to objects in j
+        x <- pos_obj[i,1]
+        y <- pos_obj[i,2]
+        dists <- sqrt((x - pos_obj[j,1])^2 + (y - pos_obj[j,2])^2)
+    } else if (retrieval_type_i == "indexed" && retrieval_type_j == "single") {
+        # Calculate distances to objects in i
+        x <- pos_obj[j,1]
+        y <- pos_obj[j,2]
+        dists <- sqrt((x - pos_obj[i,1])^2 + (y - pos_obj[i,2])^2)
+    } else if (retrieval_type_i == "indexed" && retrieval_type_j == "indexed") {
+        # Calculate distances between objects in i and j
+        x <- pos_obj[i,1]
+        y <- pos_obj[i,2]
+        dists <- sqrt((x - pos_obj[j,1])^2 + (y - pos_obj[j,2])^2)
+    } else if (retrieval_type_i == "rowwise" && retrieval_type_j == "single") {
+        # Calculate distances to all objects in i
+        x <- pos_obj[j,1]
+        y <- pos_obj[j,2]
+        dists <- sqrt((pos_obj[,1] - x)^2 + (pos_obj[,2] - y)^2)
+    } else if (retrieval_type_i == "rowwise" && retrieval_type_j == "indexed") {
+        # Calculate distances to objects in i
+        x <- pos_obj[j,1]
+        y <- pos_obj[j,2]
+        dists <- sqrt((pos_obj[i,1] - x)^2 + (pos_obj[i,2] - y)^2)
+    } else if (retrieval_type_i == "columnwise" && retrieval_type_j == "single") {
+        # Calculate distances to all objects in j
+        x <- pos_obj[j,1]
+        y <- pos_obj[j,2]
+        dists <- sqrt((pos_obj[,1] - x)^2 + (pos_obj[,2] - y)^2)
+    } else if (retrieval_type_i == "columnwise" && retrieval_type_j == "indexed") {
+        # Calculate distances to objects in j
+        x <- pos_obj[j,1]
+        y <- pos_obj[j,2]
+        dists <- sqrt((pos_obj[i,1] - x)^2 + (pos_obj[i,2] - y)^2)
+    } else if (retrieval_type_i == "single" && retrieval_type_j == "single") {
+        # Calculate distance between single objects
+        x <- pos_obj[i,1]
+        y <- pos_obj[i,2]
+        dists <- sqrt((x - pos_obj[j,1])^2 + (y - pos_obj[j,2])^2)
+    } else {
+        stop("Invalid retrieval types")
+    }
+
+    return(dists)
+})
+
 .st_dist <- function(st_meta) {
-    st_dist <- as.matrix(stats::dist(x = cbind(st_meta$x, st_meta$y)))
-    rownames(st_dist) <- st_meta[, 1]
-    colnames(st_dist) <- st_meta[, 1]
-    return(st_dist)
+    dta <- cbind(st_meta$x, st_meta$y)
+    rownames(dta) <- st_meta[, 1]
+    return(new("DistMatrix", pos = dta))
 }
 
 .determine_celltype <- function(st_meta, min_percent) {

@@ -108,7 +108,7 @@ createSpaTalk <- function(st_data, st_meta, species, if_st_is_sc, spot_max_cell,
     }
     # check st_data and st_meta
     if (if_st_is_sc) {
-        if (!all(c("cell", "x", "y") == colnames(st_meta))) {
+        if (!all(c("cell", "x", "y") == colnames(st_meta))) { 
             stop("Please provide a correct st_meta data.frame! See demo_st_sc_meta()!")
         }
         if (!all(colnames(st_data) == st_meta$cell)) {

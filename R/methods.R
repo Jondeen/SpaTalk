@@ -117,16 +117,24 @@ createSpaTalk <- function(st_data, st_meta, species, if_st_is_sc, spot_max_cell,
         st_type <- "single-cell"
         spot_max_cell <- 1
     } else {
-        if (!all(c("spot", "x", "y") == colnames(st_meta))) {
+        if (!all(c("spot", "x", "y") == colnames(st_meta)) || !all(c("spot", "x", "y", "n") == colnames(st_meta))){
             stop("Please provide a correct st_meta data.frame! See demo_st_meta()!")
         }
         if (!all(colnames(st_data) == st_meta$spot)) {
             stop("colnames(st_data) is not consistent with st_meta$spot!")
         }
         st_type <- "spot"
+        if ("n" %in% colnames(st_meta)) {
+            if (any(is.na(st_meta$n))) {
+                stop("Cell number in st_meta$n contains NA!")
+            }
+            spot_max_cell <- st_meta$spot_max_cell
+            st_meta <- st_meta[, -which(colnames(st_meta) == "n")]
+        }
     }
+
     if (is.null(spot_max_cell)) {
-        stop("Please provide the spot_max_cell!")
+        stop("Please provide the spot_max_cell, or supply 'n' in st_meta!")
     }
     st_data <- st_data[which(rowSums(st_data) > 0), ]
     if (nrow(st_data) == 0) {
@@ -161,6 +169,7 @@ createSpaTalk <- function(st_data, st_meta, species, if_st_is_sc, spot_max_cell,
         para = list(species = species, st_type = st_type, spot_max_cell = spot_max_cell, if_skip_dec_celltype = if_skip_dec_celltype))
     return(object)
 }
+
 
 #' @title Decomposing cell type for spatial transcriptomics data
 #'

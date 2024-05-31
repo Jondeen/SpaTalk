@@ -131,7 +131,7 @@ createSpaTalk <- function(st_data, st_meta, species, if_st_is_sc, spot_max_cell,
             if (any(is.na(st_meta$n))) {
                 stop("Cell number in st_meta$n contains NA!")
             }
-            spot_max_cell <- st_meta$spot_max_cell
+            spot_max_cell <- st_meta$n
             st_meta <- st_meta[, -which(colnames(st_meta) == "n")]
         }
     }

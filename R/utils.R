@@ -286,7 +286,13 @@
 .normalize_data <- function(rawdata) {
     rawdata <- Seurat::CreateSeuratObject(rawdata)
     rawdata <- Seurat::NormalizeData(rawdata, verbose = F)
-    rawdata <- rawdata[["RNA"]]@data
+    ver <- packageVersion("Seurat")
+    ver <- substr(ver,1,1)
+    if (ver >= 5) {
+        rawdata <- rawdata@assays$RNA$data
+    } else {
+        rawdata <- rawdata[["RNA"]]@data
+    }
     return(rawdata)
 }
 
